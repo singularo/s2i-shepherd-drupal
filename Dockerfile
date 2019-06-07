@@ -26,12 +26,12 @@ RUN apt-get update \
 && locale-gen en_AU.UTF-8 \
 && apt-get -y dist-upgrade \
 && apt-get -y install \
+  apache2 \
+  bind9-host \
+  git \
   gnupg2 \
   iputils-ping \
-  telnet \
-  bind9-host \
-  apache2 \
-  git \
+  iproute2 \
   libapache2-mod-php7.2 \
   libedit-dev \
   mysql-client \
@@ -47,9 +47,11 @@ RUN apt-get update \
   php-opcache \
   php-redis \
   php-soap \
+  php-sqlite3 \
   php-xml \
   php-zip \
   ssmtp \
+  telnet \
   unzip \
   wget \
 && apt-get -y autoremove && apt-get -y autoclean && apt-get clean && rm -rf /var/lib/apt/lists /tmp/* /var/tmp/*
