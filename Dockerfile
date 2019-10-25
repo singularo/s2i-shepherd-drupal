@@ -50,6 +50,7 @@ RUN apt-get update \
   php-sqlite3 \
   php-xml \
   php-zip \
+  sqlite3 \
   ssmtp \
   telnet \
   unzip \
