@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 
-LABEL MAINTAINER="Michael Priest <michael.priest@adelaide.edu.au>"
+LABEL MAINTAINER="Simon Lindsay <simon@iseek.biz>"
 
 LABEL io.k8s.description="Platform for serving Drupal PHP apps in Shepherd" \
       io.k8s.display-name="Shepherd Drupal" \
@@ -50,6 +50,8 @@ RUN apt-get update \
   php-sqlite3 \
   php-xml \
   php-zip \
+  restic \
+  rsync \
   sqlite3 \
   ssmtp \
   telnet \

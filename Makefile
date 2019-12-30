@@ -1,4 +1,4 @@
-IMAGE_NAME = uofa/s2i-shepherd-drupal
+IMAGE_NAME = singularo/s2i-shepherd-drupal
 
 .PHONY: build
 build:
