@@ -17,6 +17,7 @@ mkdir -p /code/web
 
 # Is the $WEB_PATH set?
 if [ -n "${WEB_PATH:+1}" ]; then
+  echo "---> Enabling web path."
   # If it's set, ensure $WEB_PATH starts with a slash.
   WEB_PATH=$(echo ${WEB_PATH} | sed 's#^\([^/]\)#/\1#')
 
@@ -32,6 +33,17 @@ if [ -n "${WEB_PATH:+1}" ]; then
     rm ${HTACCESS_TEMP}
   fi
 fi
+
+# Is the bare domain value set?
+if [ -n "${BARE_DOMAIN:+1}" ]; then
+  echo "---> Enabling bare domain for Drupal."
+  # If it's set, uncomment the bare domain settings
+  HTACCESS_TEMP=$(tempfile)
+  sed "s@# RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]/\$@RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]@g" /code/web/.htaccess > ${HTACCESS_TEMP}
+  sed "s@# RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]\$@RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]@g" /code/web/.htaccess >> ${HTACCESS_TEMP}
+  cp ${HTACCESS_TEMP} /code/web/.htaccess
+  rm ${HTACCESS_TEMP}
+fi  
 
 echo "---> Symlinking public files directory to ${PUBLIC_DIR}."
 # If $PUBLIC_DIR is set, symlink it to /shared/public and correct permissions.
