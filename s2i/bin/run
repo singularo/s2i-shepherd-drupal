@@ -16,13 +16,13 @@ echo "---> Ensuring /code/web directory exists."
 mkdir -p /code/web
 
 # Is the $WEB_PATH set?
-if [ -n "${WEB_PATH:+1}" ]; then
+if [ -n "${WEB_PATH}" ]; then
   echo "---> Enabling web path."
-  # If it's set, ensure $WEB_PATH starts with a slash.
+  # If it's set, ensure it starts with a slash.
   WEB_PATH=$(echo ${WEB_PATH} | sed 's#^\([^/]\)#/\1#')
 
   # Unset $WEB_PATH if it's just a slash. Otherwise Apache does weird things.
-  if [ "$WEB_PATH" == "/" ]; then
+  if [ "${WEB_PATH}" == "/" ]; then
     unset WEB_PATH
   else
     # Set rewrite base in htaccess to WEB_PATH to generate correct URLs.
@@ -35,31 +35,32 @@ if [ -n "${WEB_PATH:+1}" ]; then
 fi
 
 # Is the bare domain value set?
-if [ -n "${BARE_DOMAIN:+1}" ]; then
+if [ -n "${BARE_DOMAIN}" ]; then
   echo "---> Enabling bare domain for Drupal."
   # If it's set, uncomment the bare domain settings
   HTACCESS_TEMP=$(tempfile)
-  sed "s@# RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]/\$@RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]@g" /code/web/.htaccess > ${HTACCESS_TEMP}
-  sed "s@# RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]\$@RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]@g" /code/web/.htaccess >> ${HTACCESS_TEMP}
+  cp /code/web/.htaccess ${HTACCESS_TEMP}
+  sed -i'' "s@# RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]/\$@RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]@g" ${HTACCESS_TEMP}
+  sed -i'' "s@# RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]\$@RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]@g" ${HTACCESS_TEMP}
   cp ${HTACCESS_TEMP} /code/web/.htaccess
   rm ${HTACCESS_TEMP}
-fi  
+fi
 
 echo "---> Symlinking public files directory to ${PUBLIC_DIR}."
 # If $PUBLIC_DIR is set, symlink it to /shared/public and correct permissions.
-if [ -n "${PUBLIC_DIR:+1}" ]; then
+if [ -n "${PUBLIC_DIR}" ]; then
   mkdir -p ${PUBLIC_DIR}
 fi
 
 echo "---> Symlinking private files directory to ${PRIVATE_DIR}."
 # If $PRIVATE_DIR is set, ensure it exists and has correct permissions.
-if [ -n "${PRIVATE_DIR:+1}" ]; then
+if [ -n "${PRIVATE_DIR}" ]; then
   mkdir -p ${PRIVATE_DIR}
 fi
 
 echo "---> Symlinking temporary files directory to ${TMP_DIR}."
 # If $TMP_DIR is set, ensure it exists and has correct permissions.
-if [ -n "${TMP_DIR:+1}" ]; then
+if [ -n "${TMP_DIR}" ]; then
   mkdir -p ${TMP_DIR}
 fi
 
