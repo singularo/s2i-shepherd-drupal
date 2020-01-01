@@ -38,12 +38,12 @@ fi
 if [ -n "${BARE_DOMAIN}" ]; then
   echo "---> Enabling bare domain for Drupal."
   # If it's set, uncomment the bare domain settings
-  HTACCESS_TEMP=$(tempfile)
-  cp /code/web/.htaccess ${HTACCESS_TEMP}
-  sed -i'' "s@# RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]/\$@RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]@g" ${HTACCESS_TEMP}
-  sed -i'' "s@# RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]\$@RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]@g" ${HTACCESS_TEMP}
-  cp ${HTACCESS_TEMP} /code/web/.htaccess
-  rm ${HTACCESS_TEMP}
+  php -r '$htaccess = file_get_contents("/code/web/.htaccess");
+  $htaccess = str_replace("# RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]", "RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]", $htaccess);
+  $htaccess = str_replace("# RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]", "RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]", $htaccess);
+  file_put_contents("/tmp/.htaccess", $htaccess);'
+  cp /tmp/.htaccess /code/web/.htaccess
+  rm /tmp/.htaccess
 fi
 
 echo "---> Symlinking public files directory to ${PUBLIC_DIR}."
