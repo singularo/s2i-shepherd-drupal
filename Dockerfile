@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 
-LABEL MAINTAINER="Simon Lindsay <simon@iseek.biz>"
+LABEL MAINTAINER="Simon Lindsay <singularo@gmail.com>"
 
 LABEL io.k8s.description="Platform for serving Drupal PHP apps in Shepherd" \
       io.k8s.display-name="Shepherd Drupal" \

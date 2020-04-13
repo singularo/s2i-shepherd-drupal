@@ -46,19 +46,19 @@ if [ -n "${BARE_DOMAIN}" ]; then
   rm /tmp/.htaccess
 fi
 
-echo "---> Symlinking public files directory to ${PUBLIC_DIR}."
+echo "---> Ensuring public files directory ${PUBLIC_DIR} exists."
 # If $PUBLIC_DIR is set, symlink it to /shared/public and correct permissions.
 if [ -n "${PUBLIC_DIR}" ]; then
   mkdir -p ${PUBLIC_DIR}
 fi
 
-echo "---> Symlinking private files directory to ${PRIVATE_DIR}."
+echo "---> Ensuring private files directory ${PRIVATE_DIR} exists."
 # If $PRIVATE_DIR is set, ensure it exists and has correct permissions.
 if [ -n "${PRIVATE_DIR}" ]; then
   mkdir -p ${PRIVATE_DIR}
 fi
 
-echo "---> Symlinking temporary files directory to ${TMP_DIR}."
+echo "---> Ensuring temporary files directory ${TMP_DIR} exists."
 # If $TMP_DIR is set, ensure it exists and has correct permissions.
 if [ -n "${TMP_DIR}" ]; then
   mkdir -p ${TMP_DIR}
