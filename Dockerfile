@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 LABEL MAINTAINER="Simon Lindsay <singularo@gmail.com>"
 
@@ -32,7 +32,7 @@ RUN apt-get update \
   gnupg2 \
   iputils-ping \
   iproute2 \
-  libapache2-mod-php7.2 \
+  libapache2-mod-php \
   libedit-dev \
   mysql-client \
   php-apcu \
@@ -71,7 +71,7 @@ COPY ./files/apache2.conf /etc/apache2/apache2.conf
 COPY ./files/mpm_prefork.conf /etc/apache2/mods-available/mpm_prefork.conf
 
 # PHP config.
-COPY ./files/php_custom.ini /etc/php/7.2/mods-available/php_custom.ini
+COPY ./files/php_custom.ini /etc/php/7.4/mods-available/php_custom.ini
 
 # Configure apache modules, php modules, logging.
 RUN a2enmod rewrite \
