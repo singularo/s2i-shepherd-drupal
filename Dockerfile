@@ -50,7 +50,6 @@ RUN apt-get update \
   php-sqlite3 \
   php-xml \
   php-zip \
-  restic \
   rsync \
   sqlite3 \
   ssmtp \
@@ -60,8 +59,11 @@ RUN apt-get update \
 && apt-get -y autoremove && apt-get -y autoclean && apt-get clean && rm -rf /var/lib/apt/lists /tmp/* /var/tmp/*
 
 # Install Composer.
-RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/local/bin --filename=composer
-RUN composer global require --no-interaction hirak/prestissimo
+RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/local/bin --filename=composer \
+&& composer global require --no-interaction hirak/prestissimo
+
+RUN wget -q https://github.com/restic/restic/releases/download/v0.10.0/restic_0.10.0_linux_amd64.bz2 -O - | \
+  bunzip2 > /usr/local/bin/restic && chmod +x /usr/local/bin/restic
 
 # Make bash the default shell.
 RUN ln -sf /bin/bash /bin/sh
