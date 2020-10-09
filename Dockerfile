@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:latest
 
 LABEL MAINTAINER="Simon Lindsay <singularo@gmail.com>"
 
@@ -88,7 +88,7 @@ RUN mkdir -p /code /shared
 # Add s2i scripts.
 COPY ./s2i/bin /usr/local/s2i
 RUN chmod +x /usr/local/s2i/*
-ENV PATH "$PATH:/usr/local/s2i:/code/bin"
+ENV PATH "$PATH:/usr/local/s2i:/code/vendor/bin"
 
 # Web port.
 EXPOSE 8080
