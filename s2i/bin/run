@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -e -x
 #
 # S2I run script for the 'shepherd-drupal' image.
 # The run script executes the server that runs your application.
@@ -47,7 +47,7 @@ if [ -n "${BARE_DOMAIN}" ]; then
 fi
 
 echo "---> Ensuring public files directory ${PUBLIC_DIR} exists."
-# If $PUBLIC_DIR is set, symlink it to /shared/public and correct permissions.
+# If $PUBLIC_DIR is set, ensure it exists and has correct permissions.
 if [ -n "${PUBLIC_DIR}" ]; then
   mkdir -p ${PUBLIC_DIR}
 fi

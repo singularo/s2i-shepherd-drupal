@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -e -x
 #
 # S2I assemble script for the 'shepherd-drupal' image.
 # The 'assemble' script builds your application source so that it is ready to run.
@@ -38,9 +38,9 @@ if [ -f composer.json ]; then
   composer install --no-dev --prefer-dist --no-interaction --no-ansi --optimize-autoloader
 
   echo "---> Symlink the public file directory..."
-  if [ ! -h /code/web/sites/default/files ]; then
+  if [ ! -L /code/web/sites/default/files ]; then
     chmod a+w /code/web/sites/default
-    ln -sf ${PUBLIC_DIR} /code/web/sites/default/files
+    ln -sf /shared/public /code/web/sites/default/files
     chmod a-w /code/web/sites/default
   fi
 
