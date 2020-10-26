@@ -72,15 +72,18 @@ RUN ln -sf /bin/bash /bin/sh
 COPY ./files/apache2.conf /etc/apache2/apache2.conf
 COPY ./files/mpm_prefork.conf /etc/apache2/mods-available/mpm_prefork.conf
 
-# PHP config.
-COPY ./files/php_custom.ini /etc/php/7.4/mods-available/php_custom.ini
+# PHP configs.
+RUN mkdir -p /code/php
+COPY ./files/custom.ini /code/php/custom.ini
+COPY ./files/newrelic.ini /code/php/newrelic.ini
+RUN ln -sf /code/php/newrelic.ini /etc/php/7.4/apache2/conf.d/30-newrelic.ini
+RUN ln -sf /code/php/custom.ini /etc/php/7.4/apache2/conf.d/90-custom.ini
 
 # Configure apache modules, php modules, logging.
 RUN a2enmod rewrite \
 && a2dismod vhost_alias \
 && a2disconf other-vhosts-access-log \
-&& a2dissite 000-default \
-&& phpenmod -v ALL -s ALL php_custom
+&& a2dissite 000-default
 
 # Add /code /shared directories and ensure ownership by User 33 (www-data) and Group 0 (root).
 RUN mkdir -p /code /shared

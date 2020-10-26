@@ -25,25 +25,54 @@ if [ -n "${WEB_PATH}" ]; then
   if [ "${WEB_PATH}" == "/" ]; then
     unset WEB_PATH
   else
-    # Set rewrite base in htaccess to WEB_PATH to generate correct URLs.
-    # Uses three steps via a temp file because /code/web is not group writable.
-    HTACCESS_TEMP=$(tempfile)
-    sed "s@# RewriteBase /\$@RewriteBase ${WEB_PATH}@g" /code/web/.htaccess > ${HTACCESS_TEMP}
-    cp ${HTACCESS_TEMP} /code/web/.htaccess
-    rm ${HTACCESS_TEMP}
+    php -r '$htaccess = file_get_contents("/code/web/.htaccess");
+    $htaccess = str_replace(
+      "# RewriteBase /",
+      "RewriteBase " . getenv($WEB_PATH}",
+      $htaccess);
+    file_put_contents("/tmp/.htaccess", $htaccess);'
+
+    cp /tmp/.htaccess /code/web/.htaccess
+    rm /tmp/.htaccess
   fi
 fi
 
 # Is the bare domain value set?
 if [ -n "${BARE_DOMAIN}" ]; then
-  echo "---> Enabling bare domain for Drupal."
-  # If it's set, uncomment the bare domain settings
+  echo "---> Enabling bare domain."
+  # If it's set, uncomment the bare domain settings.
   php -r '$htaccess = file_get_contents("/code/web/.htaccess");
-  $htaccess = str_replace("# RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]", "RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]", $htaccess);
-  $htaccess = str_replace("# RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]", "RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]", $htaccess);
+  $htaccess = str_replace(
+    "# RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]",
+    "RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]",
+    $htaccess);
+  $htaccess = str_replace(
+    "# RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]",
+    "RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]",
+    $htaccess);
   file_put_contents("/tmp/.htaccess", $htaccess);'
+
   cp /tmp/.htaccess /code/web/.htaccess
   rm /tmp/.htaccess
+fi
+
+# Is new relic enabled?
+if [ -n "${NEWRELIC_ENABLED}" ]; then
+  echo "---> Enabling newrelic."
+  # If its set, create the newrelic ini file from the template.
+  php -r '$newrelic = file_get_contents("/code/php/newrelic.ini");
+  $newrelic = str_replace(
+    "{{ NEWRELIC_APP }}",
+    getenv("NEWRELIC_APP"),
+    $newrelic);
+  $newrelic = str_replace(
+    "{{ NEWRELIC_LICENSE }}",
+    getenv("NEWRELIC_LICENSE"),
+    $newrelic);
+  file_put_contents("/tmp/newrelic.ini", $newrelic);'
+
+  cp /tmp/newrelic.ini /code/php/newrelic.ini
+  rm /tmp/newrelic.ini
 fi
 
 echo "---> Ensuring public files directory ${PUBLIC_DIR} exists."

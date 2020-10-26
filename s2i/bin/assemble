@@ -24,16 +24,6 @@ echo "---> Installing application source..."
 cp -Rf /tmp/src/. ./
 
 if [ -f composer.json ]; then
-  if [ -f ssh-privatekey ]; then
-    echo "---> Importing credentials from passed keys..."
-    eval $(ssh-agent)
-    ssh-add ssh-privatekey
-  fi
-
-  echo "---> Setting ssh parameters..."
-  mkdir -p ~/.ssh
-  echo -e "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null\n" > ~/.ssh/config
-
   echo "---> Installing composer dependencies..."
   composer install --no-dev --prefer-dist --no-interaction --no-ansi --optimize-autoloader
 
@@ -45,16 +35,9 @@ if [ -f composer.json ]; then
   fi
 
   if [ -f web/.htaccess ]; then
-      echo "---> Ensuring web/.htaccess file is group writable..."
-      chmod g+w web/.htaccess
+    echo "---> Ensuring web/.htaccess file is group writable..."
+    chmod g+w web/.htaccess
   fi
-
-  echo "---> Storing git ref..."
-  mkdir -p web/.shepherd && chmod g+x web/.shepherd
-  git rev-parse HEAD > web/.shepherd/git-ref || true
-
-  echo "---> Storing git tags..."
-  git describe --tags HEAD > web/.shepherd/git-tags || true
 
   echo "---> Cleaning up..."
   # Remove all .git directories to save space.
