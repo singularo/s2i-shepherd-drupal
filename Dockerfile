@@ -56,6 +56,10 @@ RUN apt-get update \
   telnet \
   unzip \
   wget \
+&& echo 'deb http://apt.newrelic.com/debian/ newrelic non-free' | tee /etc/apt/sources.list.d/newrelic.list \
+&& wget -q https://download.newrelic.com/548C16BF.gpg -O - | apt-key add - \
+&& apt-get update \
+&& apt-get -y install newrelic-php5 \
 && apt-get -y autoremove && apt-get -y autoclean && apt-get clean && rm -rf /var/lib/apt/lists /tmp/* /var/tmp/*
 
 # Install Composer.

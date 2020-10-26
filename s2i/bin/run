@@ -62,6 +62,10 @@ if [ -n "${NEWRELIC_ENABLED}" ]; then
   # If its set, create the newrelic ini file from the template.
   php -r '$newrelic = file_get_contents("/code/php/newrelic.ini");
   $newrelic = str_replace(
+    "{{ NEWRELIC_ENABLED }}",
+    getenv("NEWRELIC_ENABLED"),
+    $newrelic);
+  $newrelic = str_replace(
     "{{ NEWRELIC_APP }}",
     getenv("NEWRELIC_APP"),
     $newrelic);
@@ -69,6 +73,7 @@ if [ -n "${NEWRELIC_ENABLED}" ]; then
     "{{ NEWRELIC_LICENSE }}",
     getenv("NEWRELIC_LICENSE"),
     $newrelic);
+  echo "\n$newrelic\n";
   file_put_contents("/tmp/newrelic.ini", $newrelic);'
 
   cp /tmp/newrelic.ini /code/php/newrelic.ini
