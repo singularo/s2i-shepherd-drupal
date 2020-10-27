@@ -8,11 +8,13 @@ LABEL io.k8s.description="Platform for serving Drupal PHP apps in Shepherd" \
       io.openshift.tags="builder,shepherd,drupal,php,apache" \
       io.openshift.s2i.scripts-url="image:///usr/local/s2i"
 
+ARG PHP_VERSION="7.4"
+
 ENV DEBIAN_FRONTEND noninteractive
 
 # Configured timezone.
 ENV TZ=Australia/Adelaide
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone
 
 # Ensure UTF-8.
 ENV LANG       en_AU.UTF-8
@@ -62,6 +64,10 @@ RUN apt-get update \
 && apt-get -y install newrelic-php5 \
 && apt-get -y autoremove && apt-get -y autoclean && apt-get clean && rm -rf /var/lib/apt/lists /tmp/* /var/tmp/*
 
+# Remove the default configs newrelic creates.
+RUN rm -f /etc/php/${PHP_VERSION}/apache2/conf.d/20-newrelic.ini /etc/php/${PHP_VERSION}/apache2/conf.d/newrelic.ini \
+&& rm -f /etc/php/${PHP_VERSION}/cli/conf.d/20-newrelic.ini /etc/php/${PHP_VERSION}/cli/conf.d/newrelic.ini
+
 # Install Composer.
 RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/local/bin --filename=composer --version=1.10.16 \
 && composer global require --no-interaction hirak/prestissimo
@@ -80,8 +86,8 @@ COPY ./files/mpm_prefork.conf /etc/apache2/mods-available/mpm_prefork.conf
 RUN mkdir -p /code/php
 COPY ./files/custom.ini /code/php/custom.ini
 COPY ./files/newrelic.ini /code/php/newrelic.ini
-RUN ln -sf /code/php/newrelic.ini /etc/php/7.4/apache2/conf.d/30-newrelic.ini
-RUN ln -sf /code/php/custom.ini /etc/php/7.4/apache2/conf.d/90-custom.ini
+RUN ln -sf /code/php/newrelic.ini /etc/php/${PHP_VERSION}/apache2/conf.d/30-newrelic.ini
+RUN ln -sf /code/php/custom.ini /etc/php/${PHP_VERSION}/apache2/conf.d/90-custom.ini
 
 # Configure apache modules, php modules, logging.
 RUN a2enmod rewrite \
