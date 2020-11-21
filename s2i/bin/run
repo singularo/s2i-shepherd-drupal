@@ -56,30 +56,6 @@ if [ -n "${BARE_DOMAIN}" ]; then
   rm /tmp/.htaccess
 fi
 
-# Is new relic enabled?
-if [ -n "${NEWRELIC_ENABLED}" ]; then
-  echo "---> Enabling newrelic."
-  # If its set, create the newrelic ini file from the template.
-  php -r '$newrelic = file_get_contents("/code/php/newrelic.ini");
-  $newrelic = str_replace(
-    "{{ NEWRELIC_ENABLED }}",
-    getenv("NEWRELIC_ENABLED"),
-    $newrelic);
-  $newrelic = str_replace(
-    "{{ NEWRELIC_APP }}",
-    getenv("NEWRELIC_APP"),
-    $newrelic);
-  $newrelic = str_replace(
-    "{{ NEWRELIC_LICENSE }}",
-    getenv("NEWRELIC_LICENSE"),
-    $newrelic);
-  echo "\n$newrelic\n";
-  file_put_contents("/tmp/newrelic.ini", $newrelic);'
-
-  cp /tmp/newrelic.ini /code/php/newrelic.ini
-  rm /tmp/newrelic.ini
-fi
-
 echo "---> Ensuring public files directory ${PUBLIC_DIR} exists."
 # If $PUBLIC_DIR is set, ensure it exists and has correct permissions.
 if [ -n "${PUBLIC_DIR}" ]; then
