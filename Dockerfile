@@ -72,7 +72,7 @@ RUN rm -f /etc/php/${PHP_VERSION}/apache2/conf.d/20-newrelic.ini /etc/php/${PHP_
 RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/local/bin --filename=composer --version=1.10.16 \
 && composer global require --no-interaction hirak/prestissimo
 
-RUN wget -q https://github.com/restic/restic/releases/download/v0.10.0/restic_0.10.0_linux_amd64.bz2 -O - | \
+RUN wget -q https://github.com/restic/restic/releases/download/v0.12.0/restic_0.12.0_linux_amd64.bz2 -O - | \
   bunzip2 > /usr/local/bin/restic && chmod +x /usr/local/bin/restic
 
 # Make bash the default shell.
