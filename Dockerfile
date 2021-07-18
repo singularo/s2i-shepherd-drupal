@@ -1,6 +1,7 @@
-FROM ubuntu:latest
 
-LABEL MAINTAINER="Simon Lindsay <singularo@gmail.com>"
+FROM ubuntu:20.04
+
+LABEL maintainer="Simon Lindsay <singularo@gmail.com>"
 
 LABEL io.k8s.description="Platform for serving Drupal PHP apps in Shepherd" \
       io.k8s.display-name="Shepherd Drupal" \
@@ -8,7 +9,10 @@ LABEL io.k8s.description="Platform for serving Drupal PHP apps in Shepherd" \
       io.openshift.tags="builder,shepherd,drupal,php,apache" \
       io.openshift.s2i.scripts-url="image:///usr/local/s2i"
 
-ARG PHP_VERSION="7.4"
+ARG PHP_VERSION=7.4
+
+# Ensure shell is what we want.
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -16,18 +20,13 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TZ=Australia/Adelaide
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone
 
-# Ensure UTF-8.
-ENV LANG       en_AU.UTF-8
-ENV LANGUAGE   en_AU:en
-ENV LC_ALL     en_AU.UTF-8
-
 # Upgrade all currently installed packages and install web server packages.
 RUN apt-get update \
-&& apt-get -y install locales \
+&& apt-get -y --no-install-recommends install apt-utils ca-certificates locales \
 && sed -i -e 's/# en_AU.UTF-8 UTF-8/en_AU.UTF-8 UTF-8/' /etc/locale.gen \
 && locale-gen en_AU.UTF-8 \
-&& apt-get -y dist-upgrade \
-&& apt-get -y install \
+&& apt-get -y upgrade \
+&& apt-get -y --no-install-recommends install \
   apache2 \
   bind9-host \
   git \
@@ -58,25 +57,19 @@ RUN apt-get update \
   telnet \
   unzip \
   wget \
-&& echo 'deb http://apt.newrelic.com/debian/ newrelic non-free' | tee /etc/apt/sources.list.d/newrelic.list \
-&& wget -q https://download.newrelic.com/548C16BF.gpg -O - | apt-key add - \
-&& apt-get update \
-&& apt-get -y install newrelic-php5 \
 && apt-get -y autoremove && apt-get -y autoclean && apt-get clean && rm -rf /var/lib/apt/lists /tmp/* /var/tmp/*
 
-# Remove the default configs newrelic creates.
-RUN rm -f /etc/php/${PHP_VERSION}/apache2/conf.d/20-newrelic.ini /etc/php/${PHP_VERSION}/apache2/conf.d/newrelic.ini \
-&& rm -f /etc/php/${PHP_VERSION}/cli/conf.d/20-newrelic.ini /etc/php/${PHP_VERSION}/cli/conf.d/newrelic.ini
+# Ensure the right locale now we have the bits installed.
+ENV LANG       en_AU.UTF-8
+ENV LANGUAGE   en_AU:en
+ENV LC_ALL     en_AU.UTF-8
 
 # Install Composer.
-RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/local/bin --filename=composer --version=1.10.16 \
-&& composer global require --no-interaction hirak/prestissimo
+RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/local/bin --filename=composer
 
+# Install restic client.
 RUN wget -q https://github.com/restic/restic/releases/download/v0.12.0/restic_0.12.0_linux_amd64.bz2 -O - | \
   bunzip2 > /usr/local/bin/restic && chmod +x /usr/local/bin/restic
-
-# Make bash the default shell.
-RUN ln -sf /bin/bash /bin/sh
 
 # Apache config.
 COPY ./files/apache2.conf /etc/apache2/apache2.conf
@@ -85,8 +78,6 @@ COPY ./files/mpm_prefork.conf /etc/apache2/mods-available/mpm_prefork.conf
 # PHP configs.
 RUN mkdir -p /code/php
 COPY ./files/custom.ini /code/php/custom.ini
-COPY ./files/newrelic.ini /code/php/newrelic.ini
-RUN ln -sf /code/php/newrelic.ini /etc/php/${PHP_VERSION}/apache2/conf.d/30-newrelic.ini
 RUN ln -sf /code/php/custom.ini /etc/php/${PHP_VERSION}/apache2/conf.d/90-custom.ini
 
 # Configure apache modules, php modules, logging.
@@ -109,15 +100,14 @@ EXPOSE 8080
 # Set working directory.
 WORKDIR /code
 
-# Change all ownership to User 33 (www-data) and Group 0 (root).
+# Change all ownership to User 33 (www-data) and Group 0 (root), then set permissions.
 RUN chown -R 33:0   /var/www \
 &&  chown -R 33:0   /run/lock \
 &&  chown -R 33:0   /var/run/apache2 \
 &&  chown -R 33:0   /var/log/apache2 \
 &&  chown -R 33:0   /code \
-&&  chown -R 33:0   /shared
-
-RUN chmod -R g+rwX  /var/www \
+&&  chown -R 33:0   /shared \
+&&  chmod -R g+rwX  /var/www \
 &&  chmod -R g+rwX  /run/lock \
 &&  chmod -R g+rwX  /var/run/apache2 \
 &&  chmod -R g+rwX  /var/log/apache2 \
