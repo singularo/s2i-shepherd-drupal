@@ -22,7 +22,7 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezo
 
 # Upgrade all currently installed packages and install web server packages.
 RUN apt-get update \
-&& apt-get -y --no-install-recommends install apt-utils ca-certificates locales \
+&& apt-get -y --no-install-recommends install apt-utils ca-certificates software-properties-common locales gnupg2 gpg-agent \
 && sed -i -e 's/# en_AU.UTF-8 UTF-8/en_AU.UTF-8 UTF-8/' /etc/locale.gen \
 && locale-gen en_AU.UTF-8 \
 && apt-get -y upgrade \
@@ -30,7 +30,6 @@ RUN apt-get update \
   apache2 \
   bind9-host \
   git \
-  gnupg2 \
   iputils-ping \
   iproute2 \
   libapache2-mod-php \
@@ -65,10 +64,8 @@ ENV LANGUAGE   en_AU:en
 ENV LC_ALL     en_AU.UTF-8
 
 # Install Composer.
-RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/local/bin --filename=composer
-
-# Install restic client.
-RUN wget -q https://github.com/restic/restic/releases/download/v0.12.0/restic_0.12.0_linux_amd64.bz2 -O - | \
+RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/local/bin --filename=composer \
+&& wget -q https://github.com/restic/restic/releases/download/v0.12.1/restic_0.12.1_linux_amd64.bz2 -O - | \
   bunzip2 > /usr/local/bin/restic && chmod +x /usr/local/bin/restic
 
 # Apache config.

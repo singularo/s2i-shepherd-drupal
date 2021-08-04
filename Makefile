@@ -1,10 +1,14 @@
-IMAGE_NAME = singularo/s2i-shepherd-drupal
-PHP_VERSION = 7.4
+IMAGE_NAME = singularo/s2i-shepherd-drupal:7.4
 
 .PHONY: build
 build:
+	docker pull ubuntu:20.04
 	hadolint Dockerfile
-	docker build -t $(IMAGE_NAME):$(PHP_VERSION) --build-arg PHP_VERSION=$(PHP_VERSION) .
+	docker build -t $(IMAGE_NAME) .
+
+.PHONY: clean
+clean:
+	docker rmi $(IMAGE_NAME)
 
 .PHONY: test
 test:
