@@ -19,6 +19,9 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TZ=Australia/Adelaide
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone
 
+# Use mirrors
+COPY ./files/sources.list /etc/apt/sources.list
+
 # Upgrade all currently installed packages and install web server packages.
 RUN apt-get update \
 && apt-get -y --no-install-recommends install openssh-client patch apt-utils ca-certificates software-properties-common locales gnupg2 gpg-agent \
