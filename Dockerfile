@@ -46,7 +46,7 @@ RUN apt-get update \
   php8.0-gd \
   php8.0-ldap \
   php8.0-mbstring \
-  php8.0-memcached \
+  php8.0-memcache \
   php8.0-mysql \
   php8.0-opcache \
   php8.0-redis \
