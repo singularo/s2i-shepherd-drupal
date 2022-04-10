@@ -1,8 +1,8 @@
-IMAGE_NAME = singularo/s2i-shepherd-drupal:7.4
+IMAGE_NAME = singularo/s2i-shepherd-drupal:8.0
 
 .PHONY: build
 build:
-	docker pull ubuntu:20.04
+	docker pull ubuntu:21.10
 	hadolint Dockerfile
 	docker build -t $(IMAGE_NAME) .
 

@@ -1,5 +1,4 @@
-
-FROM ubuntu:20.04
+FROM ubuntu:21.10
 
 LABEL maintainer="Simon Lindsay <singularo@gmail.com>"
 
@@ -9,7 +8,7 @@ LABEL io.k8s.description="Platform for serving Drupal PHP apps in Shepherd" \
       io.openshift.tags="builder,shepherd,drupal,php,apache" \
       io.openshift.s2i.scripts-url="image:///usr/local/s2i"
 
-ARG PHP_VERSION=7.4
+ARG PHP="8.0"
 
 # Ensure shell is what we want.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -20,56 +19,75 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TZ=Australia/Adelaide
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone
 
-# Use mirrors
-COPY ./files/sources.list /etc/apt/sources.list
+# Use mirrors for better speed?
+#COPY ./files/sources.list /etc/apt/sources.list
 
 # Upgrade all currently installed packages and install web server packages.
 RUN apt-get update \
-&& apt-get -y --no-install-recommends install openssh-client patch apt-utils ca-certificates software-properties-common locales gnupg2 gpg-agent \
+&& apt-get -y --no-install-recommends install ca-certificates apt apt-utils \
+&& apt-get -y upgrade \
+&& apt-get -y --no-install-recommends install openssh-client patch software-properties-common locales gnupg2 gpg-agent wget \
 && sed -i -e 's/# en_AU.UTF-8 UTF-8/en_AU.UTF-8 UTF-8/' /etc/locale.gen \
 && locale-gen en_AU.UTF-8 \
+&& wget -q -O- https://download.newrelic.com/548C16BF.gpg | apt-key add - \
+&& echo 'deb http://apt.newrelic.com/debian/ newrelic non-free' | tee /etc/apt/sources.list.d/newrelic.list \
+&& add-apt-repository -y ppa:ondrej/php \
+&& apt-get -y update \
 && apt-get -y upgrade \
 && apt-get -y --no-install-recommends install \
   apache2 \
   bind9-host \
+  bzip2 \
+  fontconfig \
   git \
   iputils-ping \
   iproute2 \
-  libapache2-mod-php \
+  libapache2-mod-php8.0 \
   libedit-dev \
+  libxext6 \
+  libxrender1 \
+  libssl-dev \
+  newrelic-php5 \
   mysql-client \
-  php-apcu \
-  php-bcmath \
-  php-common \
-  php-curl \
-  php-gd \
-  php-ldap \
-  php-mbstring \
-  php-memcached \
-  php-mysql \
-  php-opcache \
-  php-redis \
-  php-soap \
-  php-sqlite3 \
-  php-xml \
-  php-zip \
+  php8.0-apcu \
+  php8.0-bcmath \
+  php8.0-common \
+  php8.0-curl \
+  php8.0-gd \
+  php8.0-ldap \
+  php8.0-mbstring \
+  php8.0-memcache \
+  php8.0-mysql \
+  php8.0-opcache \
+  php8.0-redis \
+  php8.0-soap \
+  php8.0-sqlite3 \
+  php8.0-xml \
+  php8.0-zip \
   rsync \
   sqlite3 \
   ssmtp \
   telnet \
   unzip \
-  wget \
+  xfonts-75dpi \
+  xfonts-base \
 && apt-get -y autoremove && apt-get -y autoclean && apt-get clean && rm -rf /var/lib/apt/lists /tmp/* /var/tmp/*
+
+# Remove the default configs newrelic creates.
+RUN rm -f /etc/php/${PHP}/apache2/conf.d/20-newrelic.ini /etc/php/${PHP}/apache2/conf.d/newrelic.ini \
+&& rm -f /etc/php/${PHP}/cli/conf.d/20-newrelic.ini /etc/php/${PHP}/cli/conf.d/newrelic.ini
 
 # Ensure the right locale now we have the bits installed.
 ENV LANG       en_AU.UTF-8
 ENV LANGUAGE   en_AU:en
 ENV LC_ALL     en_AU.UTF-8
 
-# Install Composer.
+# Install Composer, restic.
 RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/local/bin --filename=composer \
-&& wget -q https://github.com/restic/restic/releases/download/v0.12.1/restic_0.12.1_linux_amd64.bz2 -O - | \
-  bunzip2 > /usr/local/bin/restic && chmod +x /usr/local/bin/restic
+&& wget -q https://github.com/restic/restic/releases/download/v0.13.0/restic_0.13.0_linux_amd64.bz2 -O - | \
+   bunzip2 > /usr/local/bin/restic && chmod +x /usr/local/bin/restic \
+&& wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.focal_amd64.deb \
+&& dpkg -i wkhtmltox_0.12.6-1.focal_amd64.deb
 
 # Apache config.
 COPY ./files/apache2.conf /etc/apache2/apache2.conf
@@ -78,7 +96,7 @@ COPY ./files/mpm_prefork.conf /etc/apache2/mods-available/mpm_prefork.conf
 # PHP configs.
 RUN mkdir -p /code/php
 COPY ./files/custom.ini /code/php/custom.ini
-RUN ln -sf /code/php/custom.ini /etc/php/${PHP_VERSION}/apache2/conf.d/90-custom.ini
+RUN ln -sf /code/php/custom.ini /etc/php/${PHP}/apache2/conf.d/90-custom.ini
 
 # Configure apache modules, php modules, logging.
 RUN a2enmod rewrite \
