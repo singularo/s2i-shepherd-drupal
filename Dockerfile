@@ -96,6 +96,8 @@ COPY ./files/mpm_prefork.conf /etc/apache2/mods-available/mpm_prefork.conf
 # PHP configs.
 RUN mkdir -p /code/php
 COPY ./files/custom.ini /code/php/custom.ini
+COPY ./files/newrelic.ini /code/php/newrelic.ini
+RUN ln -sf /code/php/newrelic.ini /etc/php/${PHP}/apache2/conf.d/30-newrelic.ini
 RUN ln -sf /code/php/custom.ini /etc/php/${PHP}/apache2/conf.d/90-custom.ini
 
 # Configure apache modules, php modules, logging.
