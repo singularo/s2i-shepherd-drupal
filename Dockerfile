@@ -1,4 +1,4 @@
-FROM ubuntu:21.10
+FROM ubuntu:22.04
 
 LABEL maintainer="Simon Lindsay <singularo@gmail.com>"
 
@@ -8,7 +8,7 @@ LABEL io.k8s.description="Platform for serving Drupal PHP apps in Shepherd" \
       io.openshift.tags="builder,shepherd,drupal,php,apache" \
       io.openshift.s2i.scripts-url="image:///usr/local/s2i"
 
-ARG PHP="8.0"
+ARG PHP="8.1"
 
 # Ensure shell is what we want.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -30,6 +30,7 @@ RUN apt-get update \
 && sed -i -e 's/# en_AU.UTF-8 UTF-8/en_AU.UTF-8 UTF-8/' /etc/locale.gen \
 && locale-gen en_AU.UTF-8 \
 && wget -q -O- https://download.newrelic.com/548C16BF.gpg | apt-key add - \
+&& echo 'deb http://security.ubuntu.com/ubuntu impish-security main' | tee /etc/apt/sources.list.d/impish-security.list \
 && echo 'deb http://apt.newrelic.com/debian/ newrelic non-free' | tee /etc/apt/sources.list.d/newrelic.list \
 && add-apt-repository -y ppa:ondrej/php \
 && apt-get -y update \
@@ -42,28 +43,29 @@ RUN apt-get update \
   git \
   iputils-ping \
   iproute2 \
-  libapache2-mod-php8.0 \
+  libapache2-mod-php8.1 \
   libedit-dev \
   libxext6 \
   libxrender1 \
   libssl-dev \
+  libssl1.1 \
   newrelic-php5 \
   mysql-client \
-  php8.0-apcu \
-  php8.0-bcmath \
-  php8.0-common \
-  php8.0-curl \
-  php8.0-gd \
-  php8.0-ldap \
-  php8.0-mbstring \
-  php8.0-memcache \
-  php8.0-mysql \
-  php8.0-opcache \
-  php8.0-redis \
-  php8.0-soap \
-  php8.0-sqlite3 \
-  php8.0-xml \
-  php8.0-zip \
+  php8.1-apcu \
+  php8.1-bcmath \
+  php8.1-common \
+  php8.1-curl \
+  php8.1-gd \
+  php8.1-ldap \
+  php8.1-mbstring \
+  php8.1-memcache \
+  php8.1-mysql \
+  php8.1-opcache \
+  php8.1-redis \
+  php8.1-soap \
+  php8.1-sqlite3 \
+  php8.1-xml \
+  php8.1-zip \
   rsync \
   sqlite3 \
   ssmtp \
