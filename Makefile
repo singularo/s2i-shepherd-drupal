@@ -2,7 +2,7 @@ IMAGE_NAME = singularo/s2i-shepherd-drupal:8.0
 
 .PHONY: build
 build:
-	docker pull ubuntu:21.10
+	docker pull ubuntu:22.04
 	hadolint Dockerfile
 	docker build -t $(IMAGE_NAME) .
 

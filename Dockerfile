@@ -1,4 +1,4 @@
-FROM ubuntu:21.10
+FROM ubuntu:22.04
 
 LABEL maintainer="Simon Lindsay <singularo@gmail.com>"
 
@@ -42,32 +42,33 @@ RUN apt-get update \
   git \
   iputils-ping \
   iproute2 \
-  libapache2-mod-php8.0 \
+  libapache2-mod-php${PHP} \
   libedit-dev \
   libxext6 \
   libxrender1 \
   libssl-dev \
   newrelic-php5 \
   mysql-client \
-  php8.0-apcu \
-  php8.0-bcmath \
-  php8.0-common \
-  php8.0-curl \
-  php8.0-gd \
-  php8.0-ldap \
-  php8.0-mbstring \
-  php8.0-memcache \
-  php8.0-mysql \
-  php8.0-opcache \
-  php8.0-redis \
-  php8.0-soap \
-  php8.0-sqlite3 \
-  php8.0-xml \
-  php8.0-zip \
+  php${PHP}-apcu \
+  php${PHP}-bcmath \
+  php${PHP}-common \
+  php${PHP}-curl \
+  php${PHP}-gd \
+  php${PHP}-intl \
+  php${PHP}-ldap \
+  php${PHP}-mbstring \
+  php${PHP}-memcache \
+  php${PHP}-mysql \
+  php${PHP}-opcache \
+  php${PHP}-redis \
+  php${PHP}-soap \
+  php${PHP}-sqlite3 \
+  php${PHP}-xml \
+  php${PHP}-zip \
   rsync \
   sqlite3 \
   ssmtp \
-  telnet \
+  netcat-openbsd \
   unzip \
   xfonts-75dpi \
   xfonts-base \
@@ -84,13 +85,14 @@ ENV LC_ALL     en_AU.UTF-8
 
 # Install Composer, restic.
 RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/local/bin --filename=composer \
-&& wget -q https://github.com/restic/restic/releases/download/v0.13.0/restic_0.13.0_linux_amd64.bz2 -O - | \
+&& wget -q https://github.com/restic/restic/releases/download/v0.14.0/restic_0.14.0_linux_amd64.bz2 -O - | \
    bunzip2 > /usr/local/bin/restic && chmod +x /usr/local/bin/restic \
-&& wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.focal_amd64.deb \
-&& dpkg -i wkhtmltox_0.12.6-1.focal_amd64.deb
+&& wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb \
+&& dpkg -i wkhtmltox_0.12.6.1-2.jammy_amd64.deb
 
 # Apache config.
 COPY ./files/apache2.conf /etc/apache2/apache2.conf
+COPY ./files/remoteip.conf /etc/apache2/conf-available/remoteip.conf
 COPY ./files/mpm_prefork.conf /etc/apache2/mods-available/mpm_prefork.conf
 
 # PHP configs.
@@ -102,6 +104,7 @@ RUN ln -sf /code/php/newrelic.ini /etc/php/${PHP}/apache2/conf.d/30-newrelic.ini
 
 # Configure apache modules, php modules, logging.
 RUN a2enmod rewrite \
+&& a2enmod remoteip \
 && a2dismod vhost_alias \
 && a2disconf other-vhosts-access-log \
 && a2dissite 000-default
