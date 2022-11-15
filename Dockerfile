@@ -30,9 +30,7 @@ RUN apt-get update \
 && sed -i -e 's/# en_AU.UTF-8 UTF-8/en_AU.UTF-8 UTF-8/' /etc/locale.gen \
 && locale-gen en_AU.UTF-8 \
 && wget -q -O- https://download.newrelic.com/548C16BF.gpg | apt-key add - \
-&& echo 'deb http://security.ubuntu.com/ubuntu impish-security main' | tee /etc/apt/sources.list.d/impish-security.list \
 && echo 'deb http://apt.newrelic.com/debian/ newrelic non-free' | tee /etc/apt/sources.list.d/newrelic.list \
-&& add-apt-repository -y ppa:ondrej/php \
 && apt-get -y update \
 && apt-get -y upgrade \
 && apt-get -y --no-install-recommends install \
@@ -43,33 +41,32 @@ RUN apt-get update \
   git \
   iputils-ping \
   iproute2 \
-  libapache2-mod-php8.1 \
+  libapache2-mod-php${PHP} \
   libedit-dev \
   libxext6 \
   libxrender1 \
-  libssl-dev \
-  libssl1.1 \
   newrelic-php5 \
   mysql-client \
-  php8.1-apcu \
-  php8.1-bcmath \
-  php8.1-common \
-  php8.1-curl \
-  php8.1-gd \
-  php8.1-ldap \
-  php8.1-mbstring \
-  php8.1-memcache \
-  php8.1-mysql \
-  php8.1-opcache \
-  php8.1-redis \
-  php8.1-soap \
-  php8.1-sqlite3 \
-  php8.1-xml \
-  php8.1-zip \
+  php${PHP}-apcu \
+  php${PHP}-bcmath \
+  php${PHP}-common \
+  php${PHP}-curl \
+  php${PHP}-gd \
+  php${PHP}-intl \
+  php${PHP}-ldap \
+  php${PHP}-mbstring \
+  php${PHP}-memcache \
+  php${PHP}-mysql \
+  php${PHP}-opcache \
+  php${PHP}-redis \
+  php${PHP}-soap \
+  php${PHP}-sqlite3 \
+  php${PHP}-xml \
+  php${PHP}-zip \
   rsync \
   sqlite3 \
   ssmtp \
-  telnet \
+  netcat-openbsd \
   unzip \
   xfonts-75dpi \
   xfonts-base \
@@ -86,13 +83,15 @@ ENV LC_ALL     en_AU.UTF-8
 
 # Install Composer, restic.
 RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/local/bin --filename=composer \
-&& wget -q https://github.com/restic/restic/releases/download/v0.13.0/restic_0.13.0_linux_amd64.bz2 -O - | \
+&& wget -q https://github.com/restic/restic/releases/download/v0.14.0/restic_0.14.0_linux_amd64.bz2 -O - | \
    bunzip2 > /usr/local/bin/restic && chmod +x /usr/local/bin/restic \
-&& wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.focal_amd64.deb \
-&& dpkg -i wkhtmltox_0.12.6-1.focal_amd64.deb
+&& wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb \
+&& dpkg -i wkhtmltox_0.12.6.1-2.jammy_amd64.deb \
+&& rm wkhtmltox_0.12.6.1-2.jammy_amd64.deb
 
 # Apache config.
 COPY ./files/apache2.conf /etc/apache2/apache2.conf
+COPY ./files/remoteip.conf /etc/apache2/conf-available/remoteip.conf
 COPY ./files/mpm_prefork.conf /etc/apache2/mods-available/mpm_prefork.conf
 
 # PHP configs.
@@ -104,6 +103,7 @@ RUN ln -sf /code/php/newrelic.ini /etc/php/${PHP}/apache2/conf.d/30-newrelic.ini
 
 # Configure apache modules, php modules, logging.
 RUN a2enmod rewrite \
+&& a2enmod remoteip \
 && a2dismod vhost_alias \
 && a2disconf other-vhosts-access-log \
 && a2dissite 000-default
