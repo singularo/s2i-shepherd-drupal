@@ -88,7 +88,8 @@ RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/l
 && wget -q https://github.com/restic/restic/releases/download/v0.14.0/restic_0.14.0_linux_amd64.bz2 -O - | \
    bunzip2 > /usr/local/bin/restic && chmod +x /usr/local/bin/restic \
 && wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb \
-&& dpkg -i wkhtmltox_0.12.6.1-2.jammy_amd64.deb
+&& dpkg -i wkhtmltox_0.12.6.1-2.jammy_amd64.deb \
+&& rm wkhtmltox_0.12.6.1-2.jammy_amd64.deb
 
 # Apache config.
 COPY ./files/apache2.conf /etc/apache2/apache2.conf
