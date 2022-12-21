@@ -27,9 +27,14 @@ if [ -f composer.json ]; then
   echo "---> Installing composer dependencies..."
   composer install --no-dev --prefer-dist --no-interaction --no-ansi --optimize-autoloader
 
-  echo "---> Symlink the public file directory..."
+  echo "---> Check for Symlink of the public file directory..."
   if [ ! -L /code/web/sites/default/files ]; then
+    if [ -d /code/web/sites/default/files ]; then
+      echo "---> Removing dir created by composer"
+      rmdir /code/web/sites/default/files
+    fi
     chmod a+w /code/web/sites/default
+    echo "---> Creating Symlink..."
     ln -sf /shared/public /code/web/sites/default/files
     chmod a-w /code/web/sites/default
   fi

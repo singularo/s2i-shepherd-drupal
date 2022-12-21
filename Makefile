@@ -6,6 +6,10 @@ build:
 	hadolint Dockerfile
 	docker build -t $(IMAGE_NAME) .
 
+.PHONY: push
+push:
+	docker push $(IMAGE_NAME)
+
 .PHONY: clean
 clean:
 	docker rmi $(IMAGE_NAME)
