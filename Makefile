@@ -1,10 +1,15 @@
-IMAGE_NAME = singularo/s2i-shepherd-drupal:8.1
+TAG = php-fpm
+PROJECT = s2i-shepherd-drupal
+IMAGE_NAME = singularo/$(PROJECT):$(TAG)
 
 .PHONY: build
 build:
-	docker pull ubuntu:22.04
 	hadolint Dockerfile
 	docker build -t $(IMAGE_NAME) .
+
+.PHONY: tag
+tag:
+	docker tag $(IMAGE_NAME) $(IMAGE_NAME)
 
 .PHONY: push
 push:

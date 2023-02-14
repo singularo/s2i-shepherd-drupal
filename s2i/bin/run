@@ -74,5 +74,5 @@ if [ -n "${TMP_DIR}" ]; then
   mkdir -p ${TMP_DIR}
 fi
 
-echo "---> Starting apache2..."
-exec apache2 -D FOREGROUND
+echo "---> Starting s6..."
+exec /init

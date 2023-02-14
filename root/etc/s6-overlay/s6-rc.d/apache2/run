@@ -1,0 +1,4 @@
+#!/command/execlineb -P
+with-contenv
+
+/usr/sbin/apache2ctl -DFOREGROUND
