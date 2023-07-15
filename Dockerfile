@@ -25,6 +25,7 @@ RUN apt-get update \
   ca-certificates  \
   apt  \
   apt-utils \
+  software-properties-common \
 && apt-get -y upgrade \
 && apt-get -y --no-install-recommends --no-install-suggests install \
   openssh-client \
@@ -35,9 +36,9 @@ RUN apt-get update \
   curl \
 && sed -i -e 's/# en_AU.UTF-8 UTF-8/en_AU.UTF-8 UTF-8/' /etc/locale.gen \
 && locale-gen en_AU.UTF-8 \
-&& echo "deb http://ppa.launchpad.net/ondrej/php/ubuntu jammy main" > /etc/apt/sources.list.d/ondrej-ubuntu-php.list \
-&& apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4F4EA0AAE5267A6C \
-&& apt-get -y update \
+&& echo 'deb http://apt.newrelic.com/debian/ newrelic non-free' | tee /etc/apt/sources.list.d/newrelic.list \
+&& wget -q https://download.newrelic.com/548C16BF.gpg -O - | apt-key add - \
+&& add-apt-repository ppa:ondrej/php \
 && apt-get -y upgrade \
 && apt-get -y --no-install-recommends --no-install-suggests install \
   apache2 \
@@ -47,6 +48,7 @@ RUN apt-get update \
   iproute2 \
   jq \
   mysql-client \
+  newrelic-php5 \
   php${PHP}-apcu \
   php${PHP}-bcmath \
   php${PHP}-common \
@@ -72,18 +74,24 @@ RUN apt-get update \
   xz-utils \
 && apt-get -y autoremove --purge && apt-get -y autoclean && apt-get clean && rm -rf /var/lib/apt/lists /tmp/* /var/tmp/*
 
+# Remove the default configs newrelic creates.
+RUN rm -f /etc/php/${PHP}/apache2/conf.d/20-newrelic.ini /etc/php/${PHP}/apache2/conf.d/newrelic.ini \
+&& rm -f /etc/php/${PHP}/cli/conf.d/20-newrelic.ini /etc/php/${PHP}/cli/conf.d/newrelic.ini
+
 # Ensure the right locale now we have the bits installed.
 ENV LANG       en_AU.UTF-8
 ENV LANGUAGE   en_AU:en
 ENV LC_ALL     en_AU.UTF-8
 
-# Install Composer.
-RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/local/bin --filename=composer
+# Install Composer, restic.
+RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/local/bin --filename=composer \
+&& wget -q https://github.com/restic/restic/releases/download/v0.15.2/restic_0.15.2_linux_amd64.bz2 -O - | \
+   bunzip2 > /usr/local/bin/restic && chmod +x /usr/local/bin/restic
 
 # Configure apache modules.
 RUN a2dismod mpm_prefork vhost_alias \
 && a2enmod mpm_event proxy_fcgi setenvif rewrite remoteip \
-&& a2disconf php8.1-fpm other-vhosts-access-log \
+&& a2disconf php${PHP}-fpm other-vhosts-access-log \
 && a2dissite 000-default
 
 # Add s2i scripts.
