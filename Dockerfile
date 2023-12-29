@@ -8,7 +8,7 @@ LABEL io.k8s.description="Platform for serving Drupal PHP apps in Shepherd with 
       io.openshift.tags="builder,shepherd,drupal,php,apache" \
       io.openshift.s2i.scripts-url="image:///usr/local/s2i"
 
-ARG PHP="8.2"
+ARG PHP="8.1"
 
 # Ensure shell is what we want.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -105,6 +105,9 @@ ADD ./archives/syslogd-overlay-noarch.tar.xz /
 
 # Symlink the s6 service directory.
 RUN ln -sf /var/run/service /service
+
+# Symlink php to handle multiple versions
+RUN ln -sf /usr/sbin/php-fpm${PHP} /usr/sbin/php-fpm
 
 # Prepend the s6 path.
 ENV PATH "/command:$PATH"
