@@ -8,7 +8,7 @@ LABEL io.k8s.description="Platform for serving Drupal PHP apps in Shepherd with 
       io.openshift.tags="builder,shepherd,drupal,php,apache" \
       io.openshift.s2i.scripts-url="image:///usr/local/s2i"
 
-ARG PHP="8.1"
+ARG PHP="8.2"
 
 # Ensure shell is what we want.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -75,17 +75,16 @@ RUN apt-get update \
 && apt-get -y autoremove --purge && apt-get -y autoclean && apt-get clean && rm -rf /var/lib/apt/lists /tmp/* /var/tmp/*
 
 # Remove the default configs newrelic creates.
-RUN rm -f /etc/php/${PHP}/apache2/conf.d/20-newrelic.ini /etc/php/${PHP}/apache2/conf.d/newrelic.ini \
-&& rm -f /etc/php/${PHP}/cli/conf.d/20-newrelic.ini /etc/php/${PHP}/cli/conf.d/newrelic.ini
+RUN rm -f /etc/php/${PHP}/apache2/conf.d/20-newrelic.ini /etc/php/${PHP}/fpm/conf.d/20-newrelic.ini \
+  /etc/php/${PHP}/cli/conf.d/20-newrelic.ini /etc/php/${PHP}/mods-available/newrelic.ini
 
 # Ensure the right locale now we have the bits installed.
 ENV LANG       en_AU.UTF-8
 ENV LANGUAGE   en_AU:en
 ENV LC_ALL     en_AU.UTF-8
 
-# Install Composer, restic.
-RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/local/bin --filename=composer \
-&& wget -q https://github.com/restic/restic/releases/download/v0.15.2/restic_0.15.2_linux_amd64.bz2 -O - | \
+# Install restic.
+RUN wget -q https://github.com/restic/restic/releases/download/v0.15.2/restic_0.15.2_linux_amd64.bz2 -O - | \
    bunzip2 > /usr/local/bin/restic && chmod +x /usr/local/bin/restic
 
 # Configure apache modules.

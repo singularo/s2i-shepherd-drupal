@@ -1,10 +1,11 @@
-TAG = php-fpm
+TAG = $(shell git rev-parse --abbrev-ref HEAD)
 PROJECT = s2i-shepherd-drupal
 IMAGE_NAME = singularo/$(PROJECT):$(TAG)
 
 .PHONY: build
 build:
 	hadolint Dockerfile
+	archives/update.sh
 	docker build -t $(IMAGE_NAME) .
 
 .PHONY: tag
@@ -17,6 +18,7 @@ push:
 
 .PHONY: clean
 clean:
+	rm -f archives/*.tar.xz
 	docker rmi $(IMAGE_NAME)
 
 .PHONY: test
