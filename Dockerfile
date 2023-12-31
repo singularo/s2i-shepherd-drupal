@@ -83,8 +83,9 @@ ENV LANG       en_AU.UTF-8
 ENV LANGUAGE   en_AU:en
 ENV LC_ALL     en_AU.UTF-8
 
-# Install restic.
-RUN wget -q https://github.com/restic/restic/releases/download/v0.15.2/restic_0.15.2_linux_amd64.bz2 -O - | \
+# Install Composer, restic.
+RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/local/bin --filename=composer \
+&& wget -q "$(wget -q -O - https://api.github.com/repos/restic/restic/releases/latest | jq -r '.assets[] | select(.name | contains("linux_amd64")) | .browser_download_url')" -O - | \
    bunzip2 > /usr/local/bin/restic && chmod +x /usr/local/bin/restic
 
 # Configure apache modules.
