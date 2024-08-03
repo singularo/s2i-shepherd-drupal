@@ -18,9 +18,6 @@ make
 ## Making the image public
 Once happy with local testing the image(s), both images can be pushed to the repo with:
 
-*Note:* the IMAGE_TAG in the build-image.sh refers to the docker tag based on the branch name in the Dockerfile's.
-
-
 ```bash
 make
 make tag
@@ -32,21 +29,11 @@ To enable newrelic, add lines like these examples to your .env file. LICENSE is 
 be different for each thing being monitored.
 ```bash
 NEWRELIC_ENABLED=true
-NEWRELIC_LICENSE="1b08384231238762323223233fc0ca1fe0df80bNRAL"
+NEWRELIC_LICENSE="e33dbhas63nhgasd76t3e4hjgasd73edjhga80bNRAL"
 NEWRELIC_APP="whatever-app"
 ```
 
-## Container style change
-
-### Original - Apache2
-* Original style based on work on the Shepherd project:
-    * https://github.com/universityofadelaide/s2i-shepherd-drupal
-    * https://github.com/universityofadelaide/shepherd
-* Single process per container
-* apache2 is the main process
-* php loaded as a module.
-
-### Now - php-fpm
+### php-fpm
 * Running the lightweight s6 init system
 * Multiple processes per container
     * apache2
