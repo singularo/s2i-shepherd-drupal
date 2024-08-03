@@ -28,7 +28,6 @@ make push
 To enable newrelic, add lines like these examples to your .env file. LICENSE is the important one, APP should
 be different for each thing being monitored.
 ```bash
-NEWRELIC_ENABLED=true
 NEWRELIC_LICENSE="e33dbhas63nhgasd76t3e4hjgasd73edjhga80bNRAL"
 NEWRELIC_APP="whatever-app"
 ```
