@@ -13,7 +13,7 @@ ARG PHP="8.2"
 # Ensure shell is what we want.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Configured timezone.
 ENV TZ=Australia/Adelaide
@@ -79,9 +79,9 @@ RUN rm -f /etc/php/${PHP}/apache2/conf.d/20-newrelic.ini /etc/php/${PHP}/fpm/con
   /etc/php/${PHP}/cli/conf.d/20-newrelic.ini /etc/php/${PHP}/mods-available/newrelic.ini
 
 # Ensure the right locale now we have the bits installed.
-ENV LANG       en_AU.UTF-8
-ENV LANGUAGE   en_AU:en
-ENV LC_ALL     en_AU.UTF-8
+ENV LANG=en_AU.UTF-8
+ENV LANGUAGE=en_AU:en
+ENV LC_ALL=en_AU.UTF-8
 
 # Install Composer, restic.
 RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/local/bin --filename=composer \
@@ -97,7 +97,8 @@ RUN a2dismod mpm_prefork vhost_alias \
 # Add s2i scripts.
 COPY ./s2i/bin /usr/local/s2i
 RUN chmod +x /usr/local/s2i/*
-ENV PATH "$PATH:/usr/local/s2i:/code/vendor/bin"
+ENV PATH="/command:$PATH:/usr/local/s2i:/code/vendor/bin"
+ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
 
 # Add s6 - see https://github.com/just-containers/s6-overlay#quickstart
 ADD ./archives/s6-overlay-noarch.tar.xz /
@@ -109,10 +110,6 @@ RUN ln -sf /var/run/service /service
 
 # Symlink php to handle multiple versions
 RUN ln -sf /usr/sbin/php-fpm${PHP} /usr/sbin/php-fpm
-
-# Prepend the s6 path.
-ENV PATH "/command:$PATH"
-ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME 0
 
 # Copy our services and config in.
 COPY ./root/ /
