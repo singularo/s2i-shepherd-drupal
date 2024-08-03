@@ -33,7 +33,7 @@ be different for each thing being monitored.
 ```bash
 NEWRELIC_ENABLED=true
 NEWRELIC_LICENSE="1b08384231238762323223233fc0ca1fe0df80bNRAL"
-NEWRELIC_APP="aa-simon-local"
+NEWRELIC_APP="whatever-app"
 ```
 
 ## Container style change

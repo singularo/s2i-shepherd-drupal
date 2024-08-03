@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 LABEL maintainer="Simon Lindsay <singularo@gmail.com>"
 
@@ -8,7 +8,7 @@ LABEL io.k8s.description="Platform for serving Drupal PHP apps in Shepherd with 
       io.openshift.tags="builder,shepherd,drupal,php,apache" \
       io.openshift.s2i.scripts-url="image:///usr/local/s2i"
 
-ARG PHP="8.1"
+ARG PHP="8.2"
 
 # Ensure shell is what we want.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]

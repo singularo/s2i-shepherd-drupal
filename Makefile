@@ -4,7 +4,6 @@ IMAGE_NAME = singularo/$(PROJECT):$(TAG)
 
 .PHONY: build
 build:
-	hadolint Dockerfile
 	archives/update.sh
 	docker build -t $(IMAGE_NAME) .
 

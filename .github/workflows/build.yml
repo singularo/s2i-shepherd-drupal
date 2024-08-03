@@ -1,0 +1,23 @@
+#
+# Workflow for s2i-shepherd-drupal image.
+#
+name: s2i-shepherd-drupal
+
+on:
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Make
+        run: |
+          set -x
+          REMOTE=$(git remote -v | awk '{ print $2 }' | uniq | sed 's/https:\/\///' | sed 's/github.com/ghcr.io/' | sed 's/\.git$//')
+          FULLPATH=${REMOTE}
+          make
+          docker login --username ${{ github.actor }} --password ${{ secrets.CR_PAT }} ghcr.io
+          docker push ${FULLPATH}
