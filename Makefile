@@ -18,7 +18,7 @@ push:
 .PHONY: clean
 clean:
 	rm -f archives/*.tar.xz
-	docker rmi $(IMAGE_NAME)
+	docker rmi -f $(IMAGE_NAME)
 
 .PHONY: test
 test:
