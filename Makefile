@@ -3,7 +3,7 @@ PROJECT = s2i-shepherd-drupal
 IMAGE_NAME = singularo/$(PROJECT):$(TAG)
 
 .PHONY: build
-build:
+build: pull
 	archives/update.sh
 	docker build -t $(IMAGE_NAME) .
 
@@ -24,3 +24,7 @@ clean:
 test:
 	docker build -t $(IMAGE_NAME)-candidate .
 	IMAGE_NAME=$(IMAGE_NAME)-candidate test/run
+
+.PHONY: pull
+pull:
+	docker pull $(shell grep FROM Dockerfile | cut -d' ' -f2)
