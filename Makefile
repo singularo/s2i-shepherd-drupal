@@ -1,4 +1,5 @@
-TAG = $(shell git rev-parse --abbrev-ref HEAD)
+#TAG = $(shell git rev-parse --abbrev-ref HEAD)
+TAG = 8.1
 PROJECT = s2i-shepherd-drupal
 IMAGE_NAME = singularo/$(PROJECT):$(TAG)
 
