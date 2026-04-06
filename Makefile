@@ -1,11 +1,18 @@
-TAG = $(shell git rev-parse --abbrev-ref HEAD)
-PROJECT = s2i-shepherd-drupal
+# Static tag otherwise how to test before commit?
+TAG = 8.3.2
+PROJECT = dsh-drupal
 IMAGE_NAME = singularo/$(PROJECT):$(TAG)
 
 .PHONY: build
 build: pull
 	archives/update.sh
-	docker build -t $(IMAGE_NAME) .
+	hadolint Dockerfile
+	docker build --progress plain -t $(IMAGE_NAME) .
+
+.PHONY: rebuild
+rebuild: clean
+	archives/update.sh
+	docker build --progress plain --no-cache -t $(IMAGE_NAME) .
 
 .PHONY: tag
 tag:
