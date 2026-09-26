@@ -8,7 +8,7 @@ LABEL io.k8s.description="Platform for serving Drupal PHP apps in Shepherd with 
       io.openshift.tags="builder,shepherd,drupal,php,apache" \
       io.openshift.s2i.scripts-url="image:///usr/local/s2i"
 
-ARG PHP="8.3"
+ARG PHP="8.4"
 ARG TARGETARCH=amd64
 ARG NEWRELIC_VERSION="12.5.0.30"
 
@@ -79,7 +79,7 @@ RUN apt-get update \
 RUN curl -L https://download.newrelic.com/php_agent/archive/${NEWRELIC_VERSION}/newrelic-php5-${NEWRELIC_VERSION}-linux.tar.gz | tar -C /tmp -zx \
 && export NR_INSTALL_USE_CP_NOT_LN=1 \
 && export NR_INSTALL_SILENT=1 \
-&& /tmp/newrelic-php5-*/newrelic-install install \
+&& /tmp/newrelic-php5-${NEWRELIC_VERSION}-linux/newrelic-install install \
 && rm -rf /tmp/newrelic-php5-* /tmp/nrinstall* \
 && rm -f /etc/php/${PHP}/*/conf.d/*newrelic.ini /etc/php/${PHP}/mods-available/newrelic.ini
 
@@ -89,11 +89,17 @@ ENV LANGUAGE=en_AU:en
 ENV LC_ALL=en_AU.UTF-8
 
 # Install Composer for builds.
-RUN wget -q https://getcomposer.org/installer -O - | php -- --install-dir=/usr/local/bin --filename=composer
+RUN curl -L https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Configure apache modules.
+# HTTP/2 (mod_http2) is intentionally NOT enabled: TLS/HTTP/2 is terminated in
+# front of this container, so Apache never serves HTTP/2. Leaving it out avoids
+# the HTTP/2 Bomb DoS class (CVE-2026-49975) for which no patched Apache 2.4.x
+# release exists yet.
+# mod_headers is required by Drupal's stock web/.htaccess: every
+# <IfModule mod_headers.c> block is silently skipped without it.
 RUN a2dismod mpm_prefork vhost_alias \
-&& a2enmod http2 mpm_event proxy_fcgi rewrite remoteip setenvif deflate brotli \
+&& a2enmod mpm_event proxy_fcgi rewrite remoteip setenvif deflate brotli headers \
 && a2disconf php${PHP}-fpm other-vhosts-access-log \
 && a2dissite 000-default
 
@@ -110,8 +116,8 @@ ADD ./archives/syslogd-overlay-noarch.tar.xz /
 # Architecture-specific s6-overlay (selected at build time via TARGETARCH).
 COPY ./archives/s6-overlay-x86_64.tar.xz ./archives/s6-overlay-aarch64.tar.xz /tmp/
 RUN S6_ARCH=$([ "${TARGETARCH}" = "arm64" ] && echo "aarch64" || echo "x86_64") && \
-    tar -C / -Jxpf /tmp/s6-overlay-${S6_ARCH}.tar.xz && \
-    rm -f /tmp/s6-overlay-*.tar.xz
+  tar -C / -Jxpf "/tmp/s6-overlay-${S6_ARCH}.tar.xz" && \
+  rm -f /tmp/s6-overlay-*.tar.xz
 
 # Setup symlinks.
 RUN ln -sf /var/run/service /service \

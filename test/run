@@ -43,16 +43,19 @@ container_ip() {
   if [ ! -z "$DOCKER_HOST" ] && [[ "$OSTYPE" =~ 'darwin' ]]; then
     docker-machine ip
   else
-    docker inspect --format="{{ .NetworkSettings.IPAddress }}" $(cat $cid_file)
+    # The container publishes its port to the host, so we connect via
+    # localhost. The legacy "{{.NetworkSettings.IPAddress}}" approach returns
+    # empty on modern Docker, where the IP now lives under
+    # .NetworkSettings.Networks.<network>.IPAddress.
+    echo "localhost"
   fi
 }
 
 container_port() {
-  if [ ! -z "$DOCKER_HOST" ] && [[ "$OSTYPE" =~ 'darwin' ]]; then
-    docker inspect --format="{{(index .NetworkSettings.Ports \"$test_port/tcp\" 0).HostPort}}" "$(cat "${cid_file}")"
-  else
-    echo $test_port
-  fi
+  # Resolve the host port that Docker mapped the container's $test_port to.
+  # The container is started with "-p $test_port" (no host port), so Docker
+  # assigns a random, free host port that we must look up here.
+  docker inspect --format="{{(index .NetworkSettings.Ports \"$test_port/tcp\" 0).HostPort}}" "$(cat "${cid_file}")"
 }
 
 run_s2i_build() {
