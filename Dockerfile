@@ -21,6 +21,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Australia/Adelaide
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone
 
+# Launchpad (ppa:ondrej/apache2) is returning 503s under load; let apt retry.
+RUN echo 'Acquire::Retries "10";' > /etc/apt/apt.conf.d/80-retries
+
 # Upgrade all currently installed packages and install web server packages.
 RUN apt-get update \
 && apt-get -y --no-install-recommends --no-install-suggests install \
@@ -39,7 +42,9 @@ RUN apt-get update \
 && sed -i -e 's/# en_AU.UTF-8 UTF-8/en_AU.UTF-8 UTF-8/' /etc/locale.gen \
 && locale-gen en_AU.UTF-8 \
 && apt-get update \
-&& add-apt-repository ppa:ondrej/php \
+&& curl -fsSLo /tmp/debsuryorg-archive-keyring.deb https://packages.sury.org/debsuryorg-archive-keyring.deb \
+&& dpkg -i /tmp/debsuryorg-archive-keyring.deb \
+&& echo "deb [signed-by=/usr/share/keyrings/debsuryorg-archive-keyring.gpg] https://packages.sury.org/php/ $(. /etc/os-release && echo "${VERSION_CODENAME}") main" > /etc/apt/sources.list.d/php.list \
 && add-apt-repository ppa:ondrej/apache2 \
 && apt-get -y --no-install-recommends --no-install-suggests install \
   apache2 \
