@@ -1,5 +1,5 @@
 # Static tag otherwise how to test before commit?
-TAG = 8.4.0
+TAG = 8.4.1
 PROJECT = dsh-drupal
 IMAGE_NAME = singularo/$(PROJECT):$(TAG)
 
