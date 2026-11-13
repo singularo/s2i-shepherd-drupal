@@ -6,22 +6,24 @@ Original instructions available here - https://github.com/openshift/source-to-im
 ## Execute build
 ```bash
 IMAGE_NAME=singularo/s2i-shepherd-drupal
-docker build -t ${IMAGE_NAME} .
+docker build --build-arg NEWRELIC_VERSION=12.12.0.41 -t ${IMAGE_NAME} .
 ```
+NEWRELIC_VERSION is required. The Makefile looks up the latest one itself.
 
 ## Building the main runtime image.
 The builder image can also be created by using the *make* command since a *Makefile* is included.
 ```bash
-make
+make TAG=8.4.2
 ```
+TAG is required. `make rebuild TAG=...` does the same from scratch (no Docker cache).
 
 ## Making the image public
 Once happy with local testing the image(s), both images can be pushed to the repo with:
 
 ```bash
-make
-make tag
-make push
+make TAG=8.4.2
+make tag TAG=8.4.2
+make push TAG=8.4.2
 ```
 
 ## Newrelic support.

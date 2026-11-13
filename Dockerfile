@@ -10,7 +10,8 @@ LABEL io.k8s.description="Platform for serving Drupal PHP apps in Shepherd with 
 
 ARG PHP="8.4"
 ARG TARGETARCH=amd64
-ARG NEWRELIC_VERSION="12.5.0.30"
+# Set by the Makefile to the latest release; no default so it is never stale.
+ARG NEWRELIC_VERSION
 
 # Ensure shell is what we want.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -81,7 +82,8 @@ RUN apt-get update \
   xz-utils \
 && apt-get -y autoremove --purge && apt-get -y autoclean && apt-get clean && rm -rf /var/lib/apt/lists /tmp/* /var/tmp/*
 
-RUN curl -L https://download.newrelic.com/php_agent/archive/${NEWRELIC_VERSION}/newrelic-php5-${NEWRELIC_VERSION}-linux.tar.gz | tar -C /tmp -zx \
+RUN : "${NEWRELIC_VERSION:?pass --build-arg NEWRELIC_VERSION, make does this}" \
+&& curl -L https://download.newrelic.com/php_agent/archive/${NEWRELIC_VERSION}/newrelic-php5-${NEWRELIC_VERSION}-linux.tar.gz | tar -C /tmp -zx \
 && export NR_INSTALL_USE_CP_NOT_LN=1 \
 && export NR_INSTALL_SILENT=1 \
 && /tmp/newrelic-php5-${NEWRELIC_VERSION}-linux/newrelic-install install \
